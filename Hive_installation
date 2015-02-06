@@ -1,0 +1,25 @@
+Hive Installation steps:
+
+https://cwiki.apache.org/confluence/display/Hive/GettingStarted
+http://hortonworks.com/hadoop-tutorial/how-to-process-data-with-apache-hive/
+
+
+
+1. Download hive binaries from here:
+http://www.eng.lsu.edu/mirrors/apache/hive/hive-0.12.0/hive-0.12.0-bin.tar.gz
+
+2. untar it into same directory where your hadoop is stored.
+
+3. Add HIVE_HOME to your path and add it as a env variable too
+
+4. export HIVE_HOME=/opt/hadoop/hive
+
+5. export PATH=$HIVE_HOME/bin:$PATH
+
+6. Create directories in hdfs:
+$HADOOP_HOME/bin/hadoop fs -mkdir /tmp
+$HADOOP_HOME/bin/hadoop fs -mkdir /user/hive/warehouse
+$HADOOP_HOME/bin/hadoop fs -chmod g+w /tmp
+$HADOOP_HOME/bin/hadoop fs -chmod g+w /user/hive/warehouse
+
+7. After this you’re good to go.

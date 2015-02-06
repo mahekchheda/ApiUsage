@@ -1,0 +1,74 @@
+#Adding XML files into Hive using serde.
+
+1. Add the following jar to the HIVE_HOME/lib path.
+wget http://search.maven.org/remotecontent?filepath=com/ibm/spss/hive/serde2/xml/hivexmlserde/1.0.5.2/hivexmlserde-1.0.5.2.jar
+
+2. Add this downloaded jar into lib dir of hive. When you run bin/hive start
+  add jar localpath/hivexmlserde-x.x.x.x.jar;
+
+3. Create a sample xml file as follows:
+<records>
+  <record customer_id="0000-JTALA">
+    <demographics>
+      <gender>F</gender>
+      <agecat>1</agecat>
+      <edcat>1</edcat>
+      <jobcat>2</jobcat>
+      <empcat>2</empcat>
+      <retire>0</retire>
+      <jobsat>1</jobsat>
+      <marital>1</marital>
+      <spousedcat>1</spousedcat>
+      <residecat>4</residecat>
+      <homeown>0</homeown>
+      <hometype>2</hometype>
+      <addresscat>2</addresscat>
+    </demographics>
+    <financial>
+      <income>18</income>
+      <creddebt>1.003392</creddebt>
+      <othdebt>2.740608</othdebt>
+      <default>0</default>
+    </financial>
+  </record>
+</records>
+
+4. Start hive utility and create following table:
+CREATE TABLE xml_bank(customer_id STRING, income BIGINT, demographics map<string,string>, financial map<string,string>)
+ROW FORMAT SERDE 'com.ibm.spss.hive.serde2.xml.XmlSerDe'
+WITH SERDEPROPERTIES (
+"column.xpath.customer_id"="/record/@customer_id",
+"column.xpath.income"="/record/income/text()",
+"column.xpath.demographics"="/record/demographics",
+"column.xpath.financial"="/record/financial"
+)
+STORED AS
+INPUTFORMAT 'com.ibm.spss.hive.serde2.xml.XmlInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat'
+LOCATION "/user/apps/warehouse/"
+TBLPROPERTIES (
+"xmlinput.start"="<record customer",
+"xmlinput.end"="</record>"
+);
+
+
+5. This step is setting up xpath and table so when input file is given it will automatically parse xml and store it into the table.
+
+6. Now load the input record.xml into table using following command:
+load data local inpath '<local path to record.xml>' into table <table_name>;
+
+7. It will keep concatenating files as many times you run the above command.
+Now your table is ready to view contents do:
+	select * from xml_bank;
+
+
+
+
+References for writing code to parse XML files using Mahout
+
+http://java.dzone.com/articles/hadoop-practice
+http://xmlandhadoop.blogspot.com/
+https://communities.intel.com/community/itpeernetwork/datastack/blog/2013/08/15/hadoop-tutorials-ingesting-xml-in-hive-using-xpath
+https://cwiki.apache.org/confluence/display/Hive/LanguageManual+XPathUDF
+https://github.com/dvasilen/Hive-XML-SerDe/wiki/XML-data-sources
+https://cwiki.apache.org/confluence/display/Hive/Tutorial
